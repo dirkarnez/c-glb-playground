@@ -13,8 +13,8 @@ typedef struct {
 } GLBHeader;
 
 typedef struct {
-    uint32_t chunkLength;
-    uint32_t chunkType;
+    uint32_t chunk_length;
+    uint32_t chunk_type;
 } GLBChunkHeader;
 #pragma pack(pop)
 
@@ -47,26 +47,36 @@ uint16_t indices[] = {
 };
 
 // Hardcoded glTF JSON
-const char *gltf_json =
-"{\"asset\":{\"version\":\"2.0\"},"
-"\"buffers\":[{\"byteLength\":272}],"
-"\"bufferViews\":["
-"{\"buffer\":0,\"byteOffset\":0,\"byteLength\":96},"
-"{\"buffer\":0,\"byteOffset\":96,\"byteLength\":48}"
-"],"
-"\"accessors\":["
-"{\"bufferView\":0,\"componentType\":5126,\"count\":8,\"type\":\"VEC3\"},"
-"{\"bufferView\":1,\"componentType\":5123,\"count\":36,\"type\":\"SCALAR\"}"
-"],"
-"\"meshes\":[{\"primitives\":[{\"attributes\":{\"POSITION\":0},\"indices\":1}]}],"
-"\"nodes\":[{\"mesh\":0}],"
-"\"scenes\":[{\"nodes\":[0]}],"
-"\"scene\":0"
-"}";
+// const char *gltf_json =
+// "{\"asset\":{\"version\":\"2.0\"},"
+// "\"buffers\":[{\"byteLength\":272}],"
+// "\"bufferViews\":["
+// "{\"buffer\":0,\"byteOffset\":0,\"byteLength\":96},"
+// "{\"buffer\":0,\"byteOffset\":96,\"byteLength\":48}"
+// "],"
+// "\"accessors\":["
+// "{\"bufferView\":0,\"componentType\":5126,\"count\":8,\"type\":\"VEC3\"},"
+// "{\"bufferView\":1,\"componentType\":5123,\"count\":36,\"type\":\"SCALAR\"}"
+// "],"
+// "\"meshes\":[{\"primitives\":[{\"attributes\":{\"POSITION\":0},\"indices\":1}]}],"
+// "\"nodes\":[{\"mesh\":0}],"
+// "\"scenes\":[{\"nodes\":[0]}],"
+// "\"scene\":0"
+// "}";
+
+// [C and C++ string escaper & un-escaper, an online tool 🔧](https://www.cescaper.com/)
+const char *gltf_json = 
+    "{\"scene\":0,\"asset\":{\"generator\":\"ImageToStl.com\",\"version\":\"2.0\"},"
+    "\"scenes\":[{\"name\":\"Scene\",\"nodes\":[0]}],\"nodes\":[{\"name\":\"Node0\",\"children\":[1]},{\"name\":\"Node1\",\"mesh\":0}],\"materials\":[{\"name\":\"x1\",\"pbrMetallicRoughness\":{\"baseColorFactor\":[0.85,0.85,0.85,1.0],\"metallicFactor\":0.05,\"roughnessFactor\":0.5},\"doubleSided\":true}],"
+    "\"meshes\":[{\"name\":\"Mesh0\",\"primitives\":[{\"indices\":2,\"material\":0,\"attributes\":{\"POSITION\":0,\"NORMAL\":1}}]}],\"accessors\":[{\"bufferView\":0,\"componentType\":5126,\"count\":24,\"type\":\"VEC3\",\"min\":[0.0,0.0,0.0],\"max\":[10.0,10.0,10.0]},{\"bufferView\":1,\"componentType\":5126,\"count\":24,\"type\":\"VEC3\"},"
+    "{\"bufferView\":2,\"componentType\":5123,\"count\":36,\"type\":\"SCALAR\"}],\"bufferViews\":[{\"target\":34962,\"buffer\":0,\"byteLength\":288,\"byteOffset\":0},{\"target\":34962,\"buffer\":0,\"byteLength\":288,\"byteOffset\":288},"
+    "{\"target\":34963,\"buffer\":0,\"byteLength\":72,\"byteOffset\":576}],\"buffers\":[{\"byteLength\":648}]}";
 
 int main() {
     FILE *f = fopen("cube.glb", "wb");
-    if (!f) return 1;
+    if (!f) {
+        return 1;
+    }
 
     // Prepare binary chunk
     uint8_t bin[96 + 48] = {0};
@@ -96,8 +106,8 @@ int main() {
 
     // Write JSON chunk header
     GLBChunkHeader jsonChunk;
-    jsonChunk.chunkLength = (uint32_t)json_chunk_len;
-    jsonChunk.chunkType = 0x4E4F534A; // 'JSON'
+    jsonChunk.chunk_length = (uint32_t)json_chunk_len;
+    jsonChunk.chunk_type = 0x4E4F534A; // 'JSON'
     fwrite(&jsonChunk, 1, sizeof(jsonChunk), f);
 
     // Write JSON chunk
@@ -106,15 +116,18 @@ int main() {
 
     // Write BIN chunk header
     GLBChunkHeader binChunk;
-    binChunk.chunkLength = (uint32_t)bin_chunk_len;
-    binChunk.chunkType = 0x004E4942; // 'BIN'
+    binChunk.chunk_length = (uint32_t)bin_chunk_len;
+    binChunk.chunk_type = 0x004E4942; // 'BIN'
     fwrite(&binChunk, 1, sizeof(binChunk), f);
 
     // Write BIN chunk
     fwrite(bin, 1, bin_len, f);
-    for (size_t i = 0; i < bin_pad; ++i) fputc(0, f);
+    for (size_t i = 0; i < bin_pad; ++i) {
+        fputc(0, f);
+    }
 
     fclose(f);
+
     printf("cube.glb written.\n");
     return 0;
 }
