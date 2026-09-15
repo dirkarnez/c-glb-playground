@@ -6,3 +6,6 @@ c-glb-playground
 
 ### Tools
 - [C and C++ string escaper & un-escaper, an online tool 🔧](https://www.cescaper.com/)
+
+
+<!-- Security scan triggered at 2026-09-15 09:32:54 -->
